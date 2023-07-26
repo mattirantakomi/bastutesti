@@ -37,3 +37,6 @@ spec:
       - name: ubuntu
         image: ubuntu
         command: [ "/bin/sh" , "-c", "tail -f /dev/null" ]
+      - name: ubuntu2
+        image: ubuntu
+        command: [ "/bin/sh" , "-c", "tail -f /dev/null" ]

@@ -1,0 +1,1 @@
+vm_id: "{{ vm_master_id }}"

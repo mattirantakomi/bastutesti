@@ -1,0 +1,4 @@
+**/password.yml
+ansible/files/**
+!ansible/files/.gitkeep
+terraform.tfstate

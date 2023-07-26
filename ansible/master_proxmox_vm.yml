@@ -1,0 +1,15 @@
+- name: Download Ubuntu
+  hosts: bastukarr
+  strategy: free
+  tasks:
+    - name: Download Ubuntu cloud image
+      get_url:
+        url: "{{ vm_os_image_url }}"
+        dest: "{{ vm_os_image_path }}"
+        validate_certs: no
+
+- name: Create new k0s master
+  hosts: kukka
+  strategy: free
+  roles:
+    - proxmox-kube-master

@@ -1,0 +1,135 @@
+- name: Install required packages
+  apt:
+    name:
+      - python3-pip
+      - cloud-image-utils
+    state: latest
+    update_cache: yes
+
+- name: Install required python packages
+  pip:
+    name:
+      - requests
+      - proxmoxer
+
+- name: Create VM snippets directory
+  file:
+    path: "/var/lib/vz/snippets/{{ vm_master_id }}"
+    state: directory
+
+- name: Enable snippets for local storage
+  shell:
+    cmd: |
+      pvesm set local --content images,rootdir,vztmpl,backup,iso,snippets
+    creates: /root/.pvesm.local
+
+- name: Create new virtual machine
+  community.general.proxmox_kvm:
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    api_host: "{{ api_host }}"
+    name: "{{ vm_master_name }}"
+    node: "{{ vm_node }}"
+    vmid: "{{ vm_master_id }}"
+    ostype: "{{ vm_ostype }}"
+    agent: "{{ vm_agent }}"
+    autostart: "{{ vm_autostart }}"
+    bios: "{{ vm_bios }}"
+    cores: "{{ vm_cores }}"
+    cpu: "{{ vm_cpu }}"
+    memory: "{{ vm_memory }}"
+    hotplug: "{{ vm_hotplug }}"
+    onboot: "{{ vm_onboot }}"
+    numa_enabled: "{{ vm_numa_enabled }}"
+    cicustom: "user=local:snippets/{{ vm_master_id }}_cloudinit" 
+    virtio:
+      virtio0: '{{ vm_storage }}:{{ vm_disk_size }},format={{ vm_disk_format }}'
+    ide: 'ide0={{ vm_storage }}:cloudinit'
+    net:
+      net0: 'virtio,bridge={{ vm_net_bridge }}'
+    ipconfig: '{"ipconfig0":"ip=dhcp"}'
+
+- name: Copy Ubuntu image to new VM disk
+  shell: 
+    cmd: |
+      # echo "{{ ansible_hostname }} {{ ansible_host }}"
+      # date
+      DISK=$(qm config "{{ vm_master_id }}" | grep ^virtio0 | awk '{ print $2 }' | awk -F ',' '{ print $1 }')
+      DISK=$(pvesm path $DISK)
+      # dd status=progress if={{ vm_os_image_path }} of=$DISK
+      qemu-img convert -O raw {{ vm_os_image_path }} $DISK
+      qemu-img resize $DISK {{ vm_disk_size }}G
+      touch /root/.vm{{ vm_master_id }}.disk
+    creates: "/root/.vm{{ vm_master_id }}.disk"
+
+- name: Create Cloudinit configuration
+  shell: 
+    cmd: |
+      MAC=$(qm config "{{ vm_master_id }}" | grep ^net0 | awk '{ print $2 }' | awk -F',' '{ print $1 }' | awk -F'=' '{ print $2 }' | awk '{print tolower($0)}' | sed -e 's/:/-/g')
+      echo """
+      #cloud-config
+      chpasswd:
+        - expire: False
+      ssh_pwauth: True
+      locale: en_US.UTF-8
+      preserve_hostname: false
+      prefer_fqdn_over_hostname: true
+      fqdn: "vm{{ vm_master_id }}-$MAC.{{ ansible_hostname }}.{{ vm_domain }}"
+      hostname: "vm{{ vm_master_id }}-$MAC"
+      users:
+        - name: "{{ vm_user }}"
+          lock_passwd: false
+          hashed_passwd: "{{ vm_password }}"
+          ssh-authorized-keys:
+            - "{{ vm_public_key }}"
+      runcmd:
+      - systemctl disable systemd-resolved
+      - systemctl stop systemd-resolved
+      - rm -rf /etc/resolv.conf
+      - echo "nameserver 1.1.1.1" > /etc/resolv.conf
+      - echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+      - sed -i -e 's/^#PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config
+      - sed -i -e 's/^#AuthorizedKeysFile.*/AuthorizedKeysFile .ssh\/authorized_keys/g' /etc/ssh/sshd_config
+      - apt-get update
+      - apt-get install -y htop sudo iotop net-tools screen wget git curl wireguard qemu-guest-agent ifupdown
+      - systemctl start qemu-guest-agent
+      - systemctl restart sshd
+      - curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/jammy.noarmor.gpg | tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+      - curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/jammy.tailscale-keyring.list | tee /etc/apt/sources.list.d/tailscale.list
+      - apt-get update
+      - apt-get install -y tailscale
+      - systemctl start qemu-guest-agent
+      - tailscale up --authkey "{{tailscale_authkey}}" --accept-routes      
+      - touch /root/DONE
+      """ > /var/lib/vz/snippets/{{ vm_master_id }}_cloudinit
+    creates: "/var/lib/vz/snippets/{{ vm_master_id }}_cloudinit"
+
+- name: Add small delay
+  shell:
+    cmd: |
+      sleep 3
+
+- name: Start virtual machine
+  community.general.proxmox_kvm:
+    api_user: "{{ api_user }}"
+    api_password: "{{ api_password }}"
+    api_host: "{{ api_host }}"
+    node: "{{ vm_node }}"
+    vmid: "{{ vm_master_id }}"
+    state: "{{ vm_state }}"
+
+- name: Register tailscale ip
+  shell:
+    cmd: |
+      while true; do tailscale status | grep -q vm13337 && break; sleep 5; done
+      tailscale status | grep vm13337 | awk '{ print $1 }'
+  register: tailscale_ip
+  changed_when: False
+  ignore_errors: True
+
+- name: Add master Tailscale ip to inventory
+  shell:
+    cmd: |
+      sed -i -e 's/^master.*/master ansible_host={{ tailscale_ip.stdout }}\n/g' inventory
+  ignore_errors: True
+  delegate_to: 127.0.0.1

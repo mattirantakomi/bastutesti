@@ -1,0 +1,33 @@
+api_host: "{{ ansible_ssh_host }}"
+api_user: root@pam
+api_password: perkele16
+vm_name: k0s-testi-worker
+vm_master_name: k0s-master
+vm_id: 3337
+#vm_master_id: 13337
+vm_node: "{{ ansible_hostname }}"
+vm_ostype: l26
+vm_agent: yes
+vm_autostart: yes
+vm_bios: seabios
+vm_cores: 4
+vm_memory: 4096
+vm_cpu: host
+vm_onboot: yes
+vm_hotplug: network, disk, cpu, memory, usb
+vm_storage: vm
+vm_disk_size: 50
+vm_disk_format: raw
+vm_net_bridge: vmbr0
+vm_numa_enabled: yes
+vm_state: started
+
+vm_domain: sandels.org
+
+vm_os_image_url: https://cloud-images.ubuntu.com/releases/jammy/release/ubuntu-22.04-server-cloudimg-amd64.img
+vm_os_image_path: /var/lib/vz/template/qemu/ubuntu-22.04-server-cloudimg-amd64.img
+
+vm_user: root
+vm_password: '\$6\$rounds=4096\$YOf2qerHlyT9d8.\$z35o2iiLU.3yTMz/Jp9g5Fzxp.ruc0pBnt6GK681TN8ROUzZ5En4KY7Iw7TZXfhj2WPzg0T45pZPybNdvnbKL0'
+vm_public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPGsTkLsNq4SFEx03bmotgnP+Wk3QL/xu9TWDCa08/+D mattirantakomi
+

@@ -1,0 +1,32 @@
+api_host: "{{ ansible_ssh_host }}"
+api_user: root@pam
+api_password: 0pe9ca020pe3
+vm_name: k0s-testi-master
+vm_id: 4337
+vm_node: "{{ ansible_hostname }}"
+vm_ostype: l26
+vm_agent: yes
+vm_autostart: yes
+vm_bios: seabios
+vm_cores: 4
+vm_memory: 4096
+vm_cpu: host
+vm_onboot: yes
+vm_hotplug: network, disk, cpu, memory, usb
+vm_storage: vm
+vm_disk_size: 50
+vm_disk_format: raw
+vm_net_bridge: vmbr1
+vm_numa_enabled: yes
+vm_state: started
+vm_net_mac: "6A:B2:CE:B3:EE:E1"
+
+vm_domain: sandels.org
+
+vm_os_image_url: http://cloud-images.ubuntu.com/releases/focal/release/ubuntu-20.04-server-cloudimg-amd64.img
+vm_os_image_path: /var/lib/vz/template/qemu/ubuntu-20.04-server-cloudimg-amd64.img
+
+vm_user: root
+#vm_password: "$6$rounds=4096$YOf2qerHlyT9d8.$z35o2iiLU.3yTMz/Jp9g5Fzxp.ruc0pBnt6GK681TN8ROUzZ5En4KY7Iw7TZXfhj2WPzg0T45pZPybNdvnbKL0"
+vm_password: '\$6\$rounds=4096\$YOf2qerHlyT9d8.\$z35o2iiLU.3yTMz/Jp9g5Fzxp.ruc0pBnt6GK681TN8ROUzZ5En4KY7Iw7TZXfhj2WPzg0T45pZPybNdvnbKL0'
+vm_public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPGsTkLsNq4SFEx03bmotgnP+Wk3QL/xu9TWDCa08/+D mattirantakomi

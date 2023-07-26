@@ -1,0 +1,6 @@
+[bastukarr]
+vaahto ansible_host=100.109.65.100
+kukka ansible_host=100.99.75.105
+
+[master]
+master ansible_host=100.122.72.25

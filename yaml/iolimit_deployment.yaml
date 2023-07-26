@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testi
+  namespace: iolimit
+spec:
+  selector:
+    matchLabels:
+      app: iolimit
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: iolimit
+    spec:
+      shareProcessNamespace: true
+      initContainers:
+      - name: iolimit
+        image: mattirantakomi/iolimit:20230726-6
+        env:
+        - name: POD_UID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+        - name: RBPS
+          value: "10485760" # 10 MB/s
+        - name: WBPS
+          value: "10485760" # 10 MB/s
+        - name: RIOPS
+          value: "1000"
+        - name: WIOPS
+          value: "1000"
+        securityContext:
+          privileged: true
+      containers:
+      - name: ubuntu
+        image: ubuntu
+        command: [ "/bin/sh" , "-c", "tail -f /dev/null" ]

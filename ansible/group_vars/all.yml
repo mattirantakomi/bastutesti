@@ -1,0 +1,11 @@
+k0s_version: v1.27.4+k0s.0
+api_password: perkele16
+tailscale_authkey: tskey-auth-kygUGm1CNTRL-rEvCn9RF7MgWyyxdqLsUTgfLkPWaf6pk1
+vm_master_id: 13337
+
+
+api_host: "100.99.75.105" # kukka
+api_user: root@pam
+api_password: perkele16
+vm_name: k0s-testi-worker
+vm_master_name: k0s-master

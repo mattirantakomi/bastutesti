@@ -24,13 +24,13 @@ spec:
             fieldRef:
               fieldPath: metadata.uid
         - name: RBPS
-          value: "10485760" # 10 MB/s
+          value: "5242880" # 5242880 = 5 MB/s, 10485760 = 10 MB/s
         - name: WBPS
-          value: "10485760" # 10 MB/s
+          value: "5242880" # 5242880 = 5 MB/s, 10485760 = 10 MB/s
         - name: RIOPS
-          value: "1000"
+          value: "500"
         - name: WIOPS
-          value: "1000"
+          value: "500"
         securityContext:
           privileged: true
       containers:

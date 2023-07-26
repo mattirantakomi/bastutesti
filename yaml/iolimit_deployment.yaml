@@ -14,7 +14,7 @@ spec:
       labels:
         app: iolimit
     spec:
-      shareProcessNamespace: true
+      shareProcessNamespace: false
       initContainers:
       - name: iolimit
         image: mattirantakomi/iolimit:20230726-6
@@ -40,3 +40,5 @@ spec:
       - name: ubuntu2
         image: ubuntu
         command: [ "/bin/sh" , "-c", "tail -f /dev/null" ]
+        securityContext:
+          privileged: true

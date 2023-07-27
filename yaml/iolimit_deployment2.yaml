@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: testi
+  name: testi3
   namespace: iolimit
 spec:
   selector:
@@ -38,11 +38,6 @@ spec:
         image: ubuntu
         command: [ "/bin/sh" , "-c", "tail -f /dev/null" ]
       - name: ubuntu2
-        image: ubuntu
-        command: [ "/bin/sh" , "-c", "tail -f /dev/null" ]
-        securityContext:
-          privileged: true
-      - name: ubuntu3
         image: ubuntu
         command: [ "/bin/sh" , "-c", "tail -f /dev/null" ]
         securityContext:

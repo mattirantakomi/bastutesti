@@ -14,6 +14,7 @@ spec:
       labels:
         app: iolimit
     spec:
+      hostNetwork: true
       shareProcessNamespace: false
       initContainers:
       - name: iolimit
